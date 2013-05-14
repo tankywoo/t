@@ -3,8 +3,10 @@
 # @tankywoo
 
 # TODO:
-# support optparse
+# add output_task in help info
+# argparse, only use one in a opt group
 # mv task between two task file
+# support optparse
 
 """
 # Move a task
@@ -29,8 +31,8 @@ except ImportError, e:
     sys.exit(1)
     # Python Version >= 2.7
     # import optparse as argparse
-
 from pprint import pprint
+
 
 class TaskT():
 
@@ -43,29 +45,37 @@ class TaskT():
         for kind, fname in filemap:
             path = os.path.join(os.path.expanduser(self.task_dir), fname)
             if os.path.exists(path):
-                # TODO:with
-                fd = open(path, 'r')
-                for task in fd.readlines():
-                    t_id, t_content, t_date = task.split('|')
-                    # TODO:getattr no error?
-                    getattr(self, kind)[t_id.strip()] = '%s | %s' % (t_content.strip(), t_date. strip())
-                fd.close()
+                with  open(path, 'r') as fd:
+                    for task in fd.readlines():
+                        t_id, t_date, t_text = [t.strip() for t in task.split('|')]
+                        # TODO:getattr no error?
+                        #getattr(self, kind)[t_id.strip()] = '%s | %s' % (t_text.strip(), t_date. strip())
 
-    def add_task(self, task):
-        task_id = 'id:%s' % str(hashlib.sha1(task).hexdigest())
+                        t = getattr(self, kind)[t_id] = {}
+                        t['text'] = t_text
+                        t['date'] = t_date
+
+
+    def add_task(self, task_text):
+        # TODO
+        task_id = '%s' % str(hashlib.sha1(task_text).hexdigest())
         date = str(datetime.date.today())
-        task = "%s | %s" % (date, task)
+        task = {}
+        task['text'] = task_text
+        task['date'] = date
         self.tasks[task_id] = task
 
-    def edit_task(self, task_id, task_content):
+    def edit_task(self, task_id, task_text):
         date = str(datetime.date.today())
-        task_content = "%s | %s" % (date, task_content)
-        self.tasks[task_id] = task_content
+        task = self.tasks[task_id]
+        task['date'] = date
+        task['text'] = task_text
+        self.tasks[task_id] = task
 
     def finish_task(self, task_id):
         # TODO: No Task
         task = self.tasks.pop(task_id)
-        self.done_tasks[task_id.strip()] = task.strip()
+        self.done_tasks[task_id.strip()] = task
 
     def remove_task(self, task_id):
         self.tasks.pop(task_id)
@@ -77,22 +87,18 @@ class TaskT():
     def output_task(self, kind='tasks'):
         tasks = getattr(self, kind).items()
         for t_id, task in tasks:
-            print '%s | %s' % (t_id.strip(), task.strip())
+            print '%s | %s | %s' % (t_id.strip(), task['date'].strip(), task['text'].strip())
 
     def write_task(self):
         filemap = (('tasks', self.task_fname), ('done_tasks', '.%s.done' % self.task_fname))
         for kind, fname in filemap:
             path = os.path.join(os.path.expanduser(self.task_dir), fname)
 
-            # TODO:with
-            fd = open(path, 'w')
-            tasks = getattr(self, kind).items()
-            print tasks
-            for t_id, task in tasks:
-                t_date, t_content = task.split('|')
-                t = "%s | %s | %s\n" % (t_id.strip(), t_date.strip(), t_content.strip())
-                fd.write(t)
-            fd.close()
+            with open(path, 'w') as fd:
+                tasks = getattr(self, kind).items()
+                for t_id, task in tasks:
+                    t =  '%s | %s | %s\n' % (t_id.strip(), task['date'].strip(), task['text'].strip())
+                    fd.write(t)
 
 
 def get_args():
@@ -129,8 +135,8 @@ if __name__ == '__main__':
             tt.write_task()
         elif args.edit:
             t_id = args.edit[0]
-            t_content = ' '.join(args.edit[1:])
-            tt.edit_task(t_id, t_content)
+            t_text = ' '.join(args.edit[1:])
+            tt.edit_task(t_id, t_text)
             tt.write_task()
         elif args.add:
             task = ' '.join(args.add).strip()
@@ -139,5 +145,6 @@ if __name__ == '__main__':
         else:
             kind = 'tasks' if not args.done else 'done_tasks'
             tt.output_task(kind=kind)
-    except:
-        print '>> ERROR'
+    except Exception ,e:
+        print str(e)
+        sys.exit(1)
