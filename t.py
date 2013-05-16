@@ -4,7 +4,6 @@
 
 # TODO:
 # add output_task in help info
-# argparse, only use one in a opt group
 # mv task between two task file
 # support optparse
 
@@ -106,6 +105,7 @@ def get_args():
     parser = argparse.ArgumentParser(description='Command-line todo - t Help',
             usage = usage)
 
+    # ArgumentParser.add_mutually_exclusive_group()
     action_group = parser.add_argument_group('Action')
     action_group.add_argument('add', default=[], nargs='*', help='Add a task')
     action_group.add_argument('-e', '--edit', dest='edit', nargs='+', help='Edit a task')
