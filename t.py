@@ -27,6 +27,44 @@ except ImportError, e:
     # import optparse as argparse
 from pprint import pprint
 
+def _prefixes(ids):
+    """Return a mapping of ids to prefixes in O(n) time.
+
+    Each prefix will be the shortest possible substring of the ID that
+    can uniquely identify it among the given group of IDs.
+
+    If an ID of one task is entirely a substring of another task's ID, the
+    entire ID will be the prefix.
+    """
+    # https://github.com/sjl/t/blob/master/t.py
+    ps = {}
+    for id in ids:
+        id_len = len(id)
+        for i in range(1, id_len+1):
+            # identifies an empty prefix slot, or a singular collision
+            prefix = id[:i]
+            if (not prefix in ps) or (ps[prefix] and prefix != ps[prefix]):
+                break
+        if prefix in ps:
+            # if there is a collision
+            other_id = ps[prefix]
+            for j in range(i, id_len+1):
+                if other_id[:j] == id[:j]:
+                    ps[id[:j]] = ''
+                else:
+                    ps[other_id[:j]] = other_id
+                    ps[id[:j]] = id
+                    break
+            else:
+                ps[other_id[:id_len+1]] = other_id
+                ps[id] = id
+        else:
+            # no collision, can safely add
+            ps[prefix] = id
+    ps = dict(zip(ps.values(), ps.keys()))
+    if '' in ps:
+        del ps['']
+    return ps
 
 class TaskT():
 
@@ -58,6 +96,13 @@ class TaskT():
     def __hash(text):
         return str(hashlib.sha1(text).hexdigest())
 
+    def __get_id(self, prefix):
+        ids = self.tasks.keys()
+        for _id in ids:
+            if _id.startswith(prefix):
+                return _id
+        return None
+
     # Main Operation
     def add_task(self, task_text):
         task_id = self.__hash(task_text)
@@ -69,7 +114,8 @@ class TaskT():
 
     def edit_task(self, task_id, task_text):
         date = str(datetime.date.today())
-        if task_id not in self.tasks:
+        task_id = self.__get_id(task_id)
+        if not task_id:
             raise Exception, 'task id is not in exist'
         task = self.tasks[task_id]
         task['date'] = date
@@ -77,13 +123,15 @@ class TaskT():
         self.tasks[task_id] = task
 
     def finish_task(self, task_id):
-        if task_id not in self.tasks:
+        task_id = self.__get_id(task_id)
+        if not task_id:
             raise Exception, 'task id is not in exist'
         task = self.tasks.pop(task_id)
         self.done_tasks[task_id] = task
 
     def remove_task(self, task_id):
-        if task_id not in self.tasks:
+        task_id = self.__get_id(task_id)
+        if not task_id:
             raise Exception, 'task id is not in exist'
         self.tasks.pop(task_id)
 
@@ -94,8 +142,11 @@ class TaskT():
 
     def output_task(self, kind='tasks'):
         tasks = getattr(self, kind).items()
+        ids = _prefixes(getattr(self, kind).keys())
+        maxlen = max(map(len, ids.values()))
         for t_id, task in tasks:
-            print '%s | %s | %s' % (t_id, task['date'], task['text'])
+            print '%s | %s | %s' % \
+                    (ids[t_id].ljust(maxlen), task['date'], task['text'])
 
     def write_task(self):
         filemap = (('tasks', self.task_fname), \
