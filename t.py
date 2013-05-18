@@ -3,6 +3,7 @@
 # @tankywoo
 
 # TODO:
+# add : check the text if it is the same
 # mv task between two task file
 # support optparse
 
@@ -106,7 +107,8 @@ class TaskT():
     # Main Operation
     def add_task(self, task_text):
         task_id = self.__hash(task_text)
-        date = str(datetime.date.today())
+        today = datetime.date.today()
+        date = '%02d-%02d' % (today.month, today.day)
         task = {}
         task['text'] = task_text
         task['date'] = date
@@ -143,10 +145,11 @@ class TaskT():
     def output_task(self, kind='tasks'):
         tasks = getattr(self, kind).items()
         ids = _prefixes(getattr(self, kind).keys())
-        maxlen = max(map(len, ids.values()))
-        for t_id, task in tasks:
-            print '%s | %s | %s' % \
-                    (ids[t_id].ljust(maxlen), task['date'], task['text'])
+        if tasks:
+            maxlen = max(map(len, ids.values()))
+            for t_id, task in tasks:
+                print '%s | %s | %s' % \
+						(ids[t_id].ljust(maxlen), task['date'], task['text'])
 
     def write_task(self):
         filemap = (('tasks', self.task_fname), \
