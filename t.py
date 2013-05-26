@@ -115,7 +115,8 @@ class TaskT():
         self.tasks[task_id] = task
 
     def edit_task(self, task_id, task_text):
-        date = str(datetime.date.today())
+        today = datetime.date.today()
+        date = '%02d-%02d' % (today.month, today.day)
         task_id = self.__get_id(task_id)
         if not task_id:
             raise Exception, 'task id is not in exist'
