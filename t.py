@@ -107,16 +107,18 @@ class TaskT():
     # Main Operation
     def add_task(self, task_text):
         task_id = self.__hash(task_text)
-        today = datetime.date.today()
-        date = '%02d-%02d' % (today.month, today.day)
+        #today = datetime.date.today()
+        #date = '%02d-%02d' % (today.month, today.day)
+        date = datetime.date.today().isoformat()
         task = {}
         task['text'] = task_text
         task['date'] = date
         self.tasks[task_id] = task
 
     def edit_task(self, task_id, task_text):
-        today = datetime.date.today()
-        date = '%02d-%02d' % (today.month, today.day)
+        #today = datetime.date.today()
+        #date = '%02d-%02d' % (today.month, today.day)
+        date = datetime.date.today().isoformat()
         task_id = self.__get_id(task_id)
         if not task_id:
             raise Exception, 'task id is not in exist'
@@ -150,7 +152,8 @@ class TaskT():
             maxlen = max(map(len, ids.values()))
             for t_id, task in tasks:
                 print '%s | %s | %s' % \
-						(ids[t_id].ljust(maxlen), task['date'], task['text'])
+                        (ids[t_id].ljust(maxlen), 
+                                task['date'].split('-', 1)[1], task['text'])
 
     def write_task(self):
         filemap = (('tasks', self.task_fname), \
