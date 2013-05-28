@@ -97,6 +97,15 @@ class TaskT():
     def __hash(text):
         return str(hashlib.sha1(text).hexdigest())
 
+    @staticmethod
+    def __output_cmp(x, y):
+        if x[1]['date'] > y[1]['date']:     return 1
+        elif x[1]['date'] < y[1]['date']:   return -1
+        else:
+            if x[0] > y[0]:     return 1
+            elif x[0] < y[0]:   return -1
+            else:               return 0
+
     def __get_id(self, prefix):
         ids = self.tasks.keys()
         for _id in ids:
@@ -147,6 +156,9 @@ class TaskT():
 
     def output_task(self, kind='tasks'):
         tasks = getattr(self, kind).items()
+        #tasks = sorted(tasks, key=lambda x:x[1]['date'], reverse=True)
+        # Sort the output by date and id
+        tasks = sorted(tasks, cmp=self.__output_cmp, reverse=True)
         ids = _prefixes(getattr(self, kind).keys())
         if tasks:
             maxlen = max(map(len, ids.values()))
