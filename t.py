@@ -102,8 +102,8 @@ class TaskT():
         if x[1]['date'] > y[1]['date']:     return 1
         elif x[1]['date'] < y[1]['date']:   return -1
         else:
-            if x[0] > y[0]:     return 1
-            elif x[0] < y[0]:   return -1
+            if x[0] > y[0]:     return -1
+            elif x[0] < y[0]:   return 1
             else:               return 0
 
     def __get_id(self, prefix):
