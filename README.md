@@ -1,10 +1,12 @@
 # 关于t #
-一个命令行下的Todo任务工具。
+一个命令行下的Todo任务工具.
 
-思想上来源于sjl写的 [t](https://github.com/sjl/t) ，里面输出短id的函数使用了sjl写的，其余自己重新实现了，加上了日期的输出和排序。
+思想上来源于sjl写的 [t](https://github.com/sjl/t) ，里面输出短id的函数使用了sjl写的，其余自己重新实现了，加上了日期的输出和排序.
 
 # 安装 #
-把t克隆到本地。
+注意: 因为用到了`argparse`模块, 所以需要 `Python >= 2.7`
+
+把t克隆到本地.
 
     git clone git@github.com:tankywoo/t.git ~/.t
 
@@ -82,6 +84,43 @@
 
 ## 删除任务 ##
 使用 `t -r 任务id` 可以直接删除一个任务
+
+# 一些技巧 #
+
+## 查看todo任务个数 ##
+
+    t | wc -l
+
+## 搜索任务中的关键字 ##
+
+    t | grep 'keyword'
+
+## 多个任务列表 ##
+比如可以把任务列表分为 `today` 和 `someday`, 可以在上面提到的shell配置文件中再添加alise命令
+
+    alias today='python ~/.t/t.py --task-dir ~/.tasks --list today'
+    alias someday='python ~/.t/t.py --task-dir ~/.tasks --list someday'
+
+这样就可以使用 today 和 someday 命令添加任务到相应任务列表
+
+# 同步问题 #
+
+命令行todo虽然方便, 但是同步却成了一个问题.  
+
+根据我个人的使用, 有以下几个方法(具体过程不详细描述, 可自行Google)
+
+## 使用Dropbox ##
+Dropbox 有 `CLI` 版本, 我最开始就用的这个, 不过考虑到间歇性同步失败(你懂的), 所以放弃了.
+
+## rsync ##
+如果你有一台 `VPS`, 可以做 rsync 当中间节点, 几台机器都通过 rsync 同步.
+
+## 远程代码托管仓库 ##
+比如国外的Github, 国内的Gitcafe等等, 如果不想让别人看见你的任务, 可以弄一个私有仓库.  
+当然, 代码托管本来是用于托管代码的, 当作网盘似得放任务不是很厚道 :(
+
+## 还有其他的方法吗? ##
+我暂时还没想到其他方法, 如果你有好的方法, 可以给我 email: me@tankywoo.com 或者直接 issue
 
 # 补充 #
 
