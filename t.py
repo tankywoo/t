@@ -104,12 +104,11 @@ class TaskT():
         return None
 
     # Main Operation
-    def add_task(self, task_text):
+    def add_task(self, task_text, setdate):
         task_id = self.__hash(task_text)
-        date = datetime.date.today().isoformat()
         task = {}
         task['text'] = task_text
-        task['date'] = date
+        task['date'] = setdate
         self.tasks[task_id] = task
 
     def edit_task(self, task_id, task_text):
@@ -176,6 +175,9 @@ def get_args():
     action_group = parser.add_argument_group('Action')
     action_group.add_argument('add', default=[], nargs='*', 
             help='Add a task')
+    action_group.add_argument('--date', default=datetime.date.today().isoformat(),
+            dest='setdate', help='Set the task date, format is iso format,\
+                    like `2013-06-02`')
     action_group.add_argument('-e', '--edit', dest='edit', nargs='+', 
             help='Edit a task')
     action_group.add_argument('-f', '--finish', dest='finish', 
@@ -220,7 +222,7 @@ if __name__ == '__main__':
             tt.write_task()
         elif args.add:
             task = ' '.join(args.add).strip()
-            tt.add_task(task)
+            tt.add_task(task, args.setdate)
             tt.write_task()
         else:
             kind = 'tasks' if not args.done else 'done_tasks'
