@@ -58,6 +58,17 @@
     a5 | 06-04 | 新增任务
     af | 06-04 | 增加t的使用说明
 
+默认增加日期, 时间是当天的date, 格式是 ISO Format
+也可以指定任务日期, 格式也是 ISO Format
+
+    15:29 tankywoo@gentoo-jl /home/tankywoo
+    % t --date 2013-06-02 新增任务并指定时间
+    15:30 tankywoo@gentoo-jl /home/tankywoo
+    % t
+    a5 | 06-02 | 新增任务并指定时间
+    7  | 06-04 | 测试t工具
+    af | 06-04 | 增加t的使用说明
+
 ## 修改任务 ##
 使用 `t -e 任务id 修改后的任务内容`
 
@@ -147,3 +158,6 @@ Dropbox 有 `CLI` 版本, 我最开始就用的这个, 不过考虑到间歇性�
 * 查看DONE任务
 * 将DONE任务重新移回TODO
 * 任务显示日期(月-日)
+
+## v1.1功能 ##
+* 增加任务日期的设置
