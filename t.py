@@ -3,17 +3,8 @@
 # @tankywoo
 
 # TODO:
-# add : check the text if it is the same
 # mv task between two task file
 # support optparse
-
-"""
-# Move a task
->> t --mv taskbox1 taskbox2 TODO
--------
-Task Example:
-taskid  task    [priority]  [date]
-"""
 
 import os
 import sys
@@ -85,10 +76,6 @@ class TaskT():
                     for task in fd.readlines():
                         t_id, t_date, t_text = \
                                 [t.strip() for t in task.split('|')]
-                        # TODO:getattr no error?
-                        #getattr(self, kind)[t_id.strip()] = \
-                        #       '%s | %s' % (t_text.strip(), t_date. strip())
-
                         t = getattr(self, kind)[t_id] = {}
                         t['text'] = t_text
                         t['date'] = t_date
@@ -106,8 +93,11 @@ class TaskT():
             elif x[0] < y[0]:   return 1
             else:               return 0
 
-    def __get_id(self, prefix):
-        ids = self.tasks.keys()
+    def __get_id(self, prefix, kind='tasks'):
+        """
+            kind in ('tasks', 'done_tasks')
+        """
+        ids = getattr(self, kind).keys()
         for _id in ids:
             if _id.startswith(prefix):
                 return _id
@@ -116,8 +106,6 @@ class TaskT():
     # Main Operation
     def add_task(self, task_text):
         task_id = self.__hash(task_text)
-        #today = datetime.date.today()
-        #date = '%02d-%02d' % (today.month, today.day)
         date = datetime.date.today().isoformat()
         task = {}
         task['text'] = task_text
@@ -125,8 +113,6 @@ class TaskT():
         self.tasks[task_id] = task
 
     def edit_task(self, task_id, task_text):
-        #today = datetime.date.today()
-        #date = '%02d-%02d' % (today.month, today.day)
         date = datetime.date.today().isoformat()
         task_id = self.__get_id(task_id)
         if not task_id:
@@ -150,13 +136,14 @@ class TaskT():
         self.tasks.pop(task_id)
 
     def undo_task(self, task_id):
-        # TODO check exist
+        task_id = self.__get_id(task_id, 'done_tasks')
+        if not task_id:
+            raise Exception, 'task id is not in done tasks'
         task = self.done_tasks.pop(task_id)
         self.tasks[task_id] = task
 
     def output_task(self, kind='tasks'):
         tasks = getattr(self, kind).items()
-        #tasks = sorted(tasks, key=lambda x:x[1]['date'], reverse=True)
         # Sort the output by date and id
         tasks = sorted(tasks, cmp=self.__output_cmp, reverse=True)
         ids = _prefixes(getattr(self, kind).keys())
@@ -195,15 +182,12 @@ def get_args():
             help='Finish a task')
     action_group.add_argument('-r', '--remove', dest='remove', 
             help='Remove a task')
-    action_group.add_argument('--undo', dest='undo', help='Undo a task')
-    #action_group.add_argument('--mv', dest='move', 
-    #       help='Move a task to another task file')
+    action_group.add_argument('--undo', dest='undo', 
+            help='Undo a task')
 
     output_group = parser.add_argument_group('Output')
     output_group.add_argument('--done', dest='done', action='store_true', 
             help='List all the done tasks')
-    #output_group.add_argument('-g', '--grep', 
-    #       help='Grep the keyword in task box')
 
     config_group = parser.add_argument_group('Config')
     config_group.add_argument('--task-dir', dest='task_dir',
@@ -222,6 +206,9 @@ if __name__ == '__main__':
     try:
         if args.finish:
             tt.finish_task(args.finish)
+            tt.write_task()
+        elif args.undo:
+            tt.undo_task(args.undo)
             tt.write_task()
         elif args.remove:
             tt.remove_task(args.remove)
