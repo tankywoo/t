@@ -110,6 +110,7 @@ class TaskT():
         task['text'] = task_text
         task['date'] = setdate
         self.tasks[task_id] = task
+        self.output_task('tasks', task_id)
 
     def edit_task(self, task_id, task_text):
         date = datetime.date.today().isoformat()
@@ -120,16 +121,19 @@ class TaskT():
         task['date'] = date
         task['text'] = task_text
         self.tasks[task_id] = task
+        self.output_task('tasks', task_id)
 
     def finish_task(self, task_id):
         task_id = self.__get_id(task_id)
         if not task_id:
             raise Exception, 'task id is not in exist'
+        self.output_task('tasks', task_id)
         task = self.tasks.pop(task_id)
         self.done_tasks[task_id] = task
 
     def remove_task(self, task_id):
         task_id = self.__get_id(task_id)
+        self.output_task('tasks', task_id)
         if not task_id:
             raise Exception, 'task id is not in exist'
         self.tasks.pop(task_id)
@@ -141,13 +145,20 @@ class TaskT():
         task = self.done_tasks.pop(task_id)
         self.tasks[task_id] = task
 
-    def output_task(self, kind='tasks'):
+    def output_task(self, kind='tasks', task_id=None):
         tasks = getattr(self, kind).items()
         # Sort the output by date and id
         tasks = sorted(tasks, cmp=self.__output_cmp, reverse=True)
         ids = _prefixes(getattr(self, kind).keys())
         if tasks:
             maxlen = max(map(len, ids.values()))
+            # TODO Refactor
+            if task_id:
+                task = self.tasks[task_id]
+                print '%s | %s | %s' % \
+                        (ids[task_id].ljust(maxlen),
+                                task['date'].split('-', 1)[1], task['text'])
+                return
             for t_id, task in tasks:
                 print '%s | %s | %s' % \
                         (ids[t_id].ljust(maxlen), 
